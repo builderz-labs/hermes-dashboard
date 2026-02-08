@@ -369,3 +369,22 @@ export function markNotificationRead(id: number): void {
 export function markAllNotificationsRead(): void {
   getDb().prepare('UPDATE notifications SET read = 1 WHERE read = 0').run();
 }
+
+// ─── Seed Registry ────────────────────────────────────────
+export function isSeedRecord(tableName: string, recordId: string): boolean {
+  const db = getDb();
+  const row = db.prepare(
+    'SELECT 1 FROM seed_registry WHERE table_name = ? AND record_id = ?'
+  ).get(tableName, recordId);
+  return !!row;
+}
+
+export function getSeedCount(): number {
+  const db = getDb();
+  return (db.prepare('SELECT COUNT(*) as c FROM seed_registry').get() as { c: number })?.c ?? 0;
+}
+
+/** Returns SQL fragment to exclude seeded records from a query */
+export function seedFilter(tableName: string, idColumn: string = 'id'): string {
+  return `AND NOT EXISTS (SELECT 1 FROM seed_registry sr WHERE sr.table_name = '${tableName}' AND sr.record_id = CAST(${idColumn} AS TEXT))`;
+}

@@ -183,5 +183,11 @@ function migrate(db: Database.Database) {
     );
     CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(read);
     CREATE INDEX IF NOT EXISTS idx_notifications_created ON notifications(created_at);
+
+    CREATE TABLE IF NOT EXISTS seed_registry (
+      table_name TEXT NOT NULL,
+      record_id TEXT NOT NULL,
+      PRIMARY KEY (table_name, record_id)
+    );
   `);
 }

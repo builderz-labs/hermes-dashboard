@@ -28,6 +28,7 @@ interface DashboardState {
   loading: Record<string, boolean>;
   lastSynced: string | null;
   feedOpen: boolean;
+  realOnly: boolean;
 
   // Actions
   setOverview: (data: OverviewStats) => void;
@@ -47,6 +48,7 @@ interface DashboardState {
   setLoading: (key: string, value: boolean) => void;
   setLastSynced: (ts: string) => void;
   toggleFeed: () => void;
+  toggleRealOnly: () => void;
 }
 
 export const useDashboard = create<DashboardState>((set) => ({
@@ -67,6 +69,7 @@ export const useDashboard = create<DashboardState>((set) => ({
   loading: {},
   lastSynced: null,
   feedOpen: false,
+  realOnly: false,
 
   setOverview: (data) => set({ overview: data }),
   setAlerts: (data) => set({ alerts: data }),
@@ -85,6 +88,7 @@ export const useDashboard = create<DashboardState>((set) => ({
   setLoading: (key, value) => set((s) => ({ loading: { ...s.loading, [key]: value } })),
   setLastSynced: (ts) => set({ lastSynced: ts }),
   toggleFeed: () => set((s) => ({ feedOpen: !s.feedOpen })),
+  toggleRealOnly: () => set((s) => ({ realOnly: !s.realOnly })),
 }));
 
 // Fetch helper

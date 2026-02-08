@@ -98,6 +98,15 @@ db.exec(`
   );
 `);
 
+// ── Seed registry table ──────────────────────────────────────────────
+db.exec(`
+  CREATE TABLE IF NOT EXISTS seed_registry (
+    table_name TEXT NOT NULL,
+    record_id TEXT NOT NULL,
+    PRIMARY KEY (table_name, record_id)
+  );
+`);
+
 // ── Wipe existing seed data ──────────────────────────────────────────
 
 const tables = [
@@ -105,8 +114,11 @@ const tables = [
   'signals', 'engagements', 'suppression', 'sequences', 'leads', 'content_posts',
 ];
 for (const t of tables) db.exec(`DELETE FROM ${t}`);
+db.exec('DELETE FROM seed_registry');
 
 console.log('Cleared existing data.\n');
+
+const registerSeed = db.prepare('INSERT OR IGNORE INTO seed_registry (table_name, record_id) VALUES (?, ?)');
 
 // ── 1. Content Posts (20 items) ──────────────────────────────────────
 
@@ -154,6 +166,10 @@ const insertPosts = db.transaction(() => {
   }
 });
 insertPosts();
+// Register all seeded content posts
+for (const row of db.prepare('SELECT id FROM content_posts').all() as { id: string }[]) {
+  registerSeed.run('content_posts', row.id);
+}
 console.log(`✓ Inserted ${posts.length} content posts`);
 
 // ── 2. Leads (18) ───────────────────────────────────────────────────
@@ -203,6 +219,9 @@ const insertLeads = db.transaction(() => {
   }
 });
 insertLeads();
+for (const row of db.prepare('SELECT id FROM leads').all() as { id: string }[]) {
+  registerSeed.run('leads', row.id);
+}
 console.log(`✓ Inserted ${leadsData.length} leads`);
 
 // ── 3. Sequences ─────────────────────────────────────────────────────
@@ -240,6 +259,9 @@ const insertSeqs = db.transaction(() => {
   }
 });
 insertSeqs();
+for (const row of db.prepare('SELECT id FROM sequences').all() as { id: string }[]) {
+  registerSeed.run('sequences', row.id);
+}
 const seqCount = db.prepare('SELECT COUNT(*) as c FROM sequences').get() as {c: number};
 console.log(`✓ Inserted ${seqCount.c} sequence steps`);
 
@@ -257,6 +279,7 @@ const insertSup = db.transaction(() => {
   for (const s of suppressions) supInsert.run(s.email, s.type, daysAgo(Math.floor(Math.random() * 14)));
 });
 insertSup();
+for (const s of suppressions) registerSeed.run('suppression', s.email);
 console.log(`✓ Inserted ${suppressions.length} suppression entries`);
 
 // ── 5. Engagements (35) ─────────────────────────────────────────────
@@ -305,6 +328,9 @@ const insertEng = db.transaction(() => {
   }
 });
 insertEng();
+for (const row of db.prepare('SELECT id FROM engagements').all() as { id: number }[]) {
+  registerSeed.run('engagements', String(row.id));
+}
 console.log('✓ Inserted 35 engagements');
 
 // ── 6. Signals (22) ─────────────────────────────────────────────────
@@ -351,6 +377,9 @@ const insertSig = db.transaction(() => {
   }
 });
 insertSig();
+for (const row of db.prepare('SELECT id FROM signals').all() as { id: number }[]) {
+  registerSeed.run('signals', String(row.id));
+}
 console.log(`✓ Inserted ${signalData.length} signals`);
 
 // ── 7. Experiments (4) ──────────────────────────────────────────────
@@ -405,6 +434,9 @@ const insertExp = db.transaction(() => {
   }
 });
 insertExp();
+for (const row of db.prepare('SELECT id FROM experiments').all() as { id: number }[]) {
+  registerSeed.run('experiments', String(row.id));
+}
 console.log(`✓ Inserted ${experiments.length} experiments`);
 
 // ── 8. Learnings (5) ────────────────────────────────────────────────
@@ -426,6 +458,9 @@ const insertLearn = db.transaction(() => {
   for (const l of learningsData) learnInsert.run(l.text, l.week, l.conf, l.applied, daysAgo(l.week * 7));
 });
 insertLearn();
+for (const row of db.prepare('SELECT id FROM learnings').all() as { id: number }[]) {
+  registerSeed.run('learnings', String(row.id));
+}
 console.log(`✓ Inserted ${learningsData.length} learnings`);
 
 // ── 9. Daily Metrics (60 days) ──────────────────────────────────────
@@ -469,6 +504,9 @@ const insertMetrics = db.transaction(() => {
   }
 });
 insertMetrics();
+for (const row of db.prepare('SELECT date FROM daily_metrics').all() as { date: string }[]) {
+  registerSeed.run('daily_metrics', row.date);
+}
 console.log('✓ Inserted 60 days of daily metrics');
 
 // ── 10. Activity Log (recent entries) ───────────────────────────────
@@ -525,6 +563,9 @@ const insertAct = db.transaction(() => {
   }
 });
 insertAct();
+for (const row of db.prepare('SELECT id FROM activity_log').all() as { id: number }[]) {
+  registerSeed.run('activity_log', String(row.id));
+}
 console.log(`✓ Inserted ${activityEntries.length} activity log entries`);
 
 // ── Done ─────────────────────────────────────────────────────────────
@@ -540,6 +581,7 @@ const counts = {
   learnings: learningsData.length,
   daily_metrics: (db.prepare('SELECT COUNT(*) as c FROM daily_metrics').get() as {c: number}).c,
   activity_log: activityEntries.length,
+  seed_registry: (db.prepare('SELECT COUNT(*) as c FROM seed_registry').get() as {c: number}).c,
 };
 
 console.log('\n── Summary ──────────────────────────────');

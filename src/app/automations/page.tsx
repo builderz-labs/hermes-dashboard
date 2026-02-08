@@ -1,8 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import {
   Zap, Clock, CheckCircle, AlertTriangle, Mail, PenLine,
-  Calendar, Activity, Timer,
+  Calendar, Activity, Timer, ThumbsUp, ThumbsDown, Loader2,
 } from 'lucide-react';
 import { useSmartPoll } from '@/hooks/use-smart-poll';
 import { timeAgo } from '@/lib/utils';
@@ -43,7 +44,7 @@ const AGENT_BG: Record<string, string> = {
 };
 
 export default function AutomationsPage() {
-  const { data, loading } = useSmartPoll<AutomationsData>(
+  const { data, loading, refetch } = useSmartPoll<AutomationsData>(
     () => fetch('/api/automations').then(r => r.json()),
     { interval: 30_000 },
   );
@@ -150,21 +151,7 @@ export default function AutomationsPage() {
           ) : (
             <div className="space-y-2 max-h-80 overflow-y-auto">
               {approvals.map(item => (
-                <div key={item.id} className={`p-3 rounded-lg ${AGENT_BG[item.agent]} flex items-start gap-3`}>
-                  <div className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center shrink-0 mt-0.5">
-                    {item.type === 'content' ? <PenLine size={14} /> : <Mail size={14} />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium truncate">{item.title}</span>
-                      {item.tier && (
-                        <span className="text-[9px] bg-muted px-1 rounded">Tier {item.tier}</span>
-                      )}
-                    </div>
-                    <p className="text-[11px] text-muted-foreground truncate">{item.preview}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">{timeAgo(item.created_at)}</p>
-                  </div>
-                </div>
+                <ApprovalCard key={item.id} item={item} onAction={refetch} />
               ))}
             </div>
           )}
@@ -250,6 +237,57 @@ export default function AutomationsPage() {
             <span>6pm</span>
             <span>12am</span>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ApprovalCard({ item, onAction }: { item: ApprovalItem; onAction: () => void }) {
+  const [acting, setActing] = useState<'approve' | 'reject' | null>(null);
+
+  async function handleAction(action: 'approve' | 'reject') {
+    setActing(action);
+    await fetch('/api/automations/approve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: item.id, type: item.type, action }),
+    });
+    onAction();
+    setActing(null);
+  }
+
+  return (
+    <div className={`p-3 rounded-lg ${AGENT_BG[item.agent]} flex items-start gap-3`}>
+      <div className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center shrink-0 mt-0.5">
+        {item.type === 'content' ? <PenLine size={14} /> : <Mail size={14} />}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium truncate">{item.title}</span>
+          {item.tier && (
+            <span className="text-[9px] bg-muted px-1 rounded">Tier {item.tier}</span>
+          )}
+        </div>
+        <p className="text-[11px] text-muted-foreground truncate">{item.preview}</p>
+        <div className="flex items-center gap-2 mt-1.5">
+          <p className="text-[10px] text-muted-foreground flex-1">{timeAgo(item.created_at)}</p>
+          <button
+            onClick={() => handleAction('approve')}
+            disabled={acting !== null}
+            className="flex items-center gap-1 text-[10px] font-medium bg-success/15 text-success hover:bg-success/25 px-2 py-0.5 rounded transition-colors disabled:opacity-50"
+          >
+            {acting === 'approve' ? <Loader2 size={10} className="animate-spin" /> : <ThumbsUp size={10} />}
+            Approve
+          </button>
+          <button
+            onClick={() => handleAction('reject')}
+            disabled={acting !== null}
+            className="flex items-center gap-1 text-[10px] font-medium bg-destructive/15 text-destructive hover:bg-destructive/25 px-2 py-0.5 rounded transition-colors disabled:opacity-50"
+          >
+            {acting === 'reject' ? <Loader2 size={10} className="animate-spin" /> : <ThumbsDown size={10} />}
+            Reject
+          </button>
         </div>
       </div>
     </div>
