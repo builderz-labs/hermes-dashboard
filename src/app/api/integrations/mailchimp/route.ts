@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { requireApiUser } from '@/lib/api-auth';
 
 // Server-only env var (preferred). Keep NEXT_PUBLIC_* as back-compat fallback.
 const apiKey = process.env.MAILCHIMP_API_KEY || process.env.NEXT_PUBLIC_MAILCHIMP_API_KEY;
@@ -13,7 +14,9 @@ function getDataCenter(key?: string) {
   return parts.length > 1 ? parts[1] : null;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const auth = requireApiUser(request);
+  if (auth) return auth;
   if (!apiKey) {
     return NextResponse.json({ enabled: false, error: 'Missing Mailchimp API key' });
   }
@@ -64,4 +67,3 @@ export async function GET() {
     return NextResponse.json({ enabled: true, ok: false, error: String(error) });
   }
 }
-

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { requireApiUser } from '@/lib/api-auth';
 
 const OLLAMA_BASE_URL = (process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434').replace(/\/+$/, '');
 const OLLAMA_TAGS = `${OLLAMA_BASE_URL}/api/tags`;
@@ -16,7 +17,9 @@ async function fetchWithTimeout(url: string, ms: number) {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const auth = requireApiUser(request);
+  if (auth) return auth;
   try {
     const [tagsRes, psRes] = await Promise.all([
       fetchWithTimeout(OLLAMA_TAGS, 2000),

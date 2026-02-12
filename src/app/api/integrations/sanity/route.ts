@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { requireApiUser } from '@/lib/api-auth';
 
 // Server-only env vars (preferred). Keep NEXT_PUBLIC_* as back-compat fallback.
 const projectId = process.env.SANITY_PROJECT_ID || process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
@@ -19,7 +20,9 @@ function buildUrl() {
   return `https://${projectId}.api.sanity.io/v${apiVersion}/data/query/${dataset}?query=${encoded}`;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const auth = requireApiUser(request);
+  if (auth) return auth;
   if (!projectId || !dataset) {
     return NextResponse.json({ enabled: false, error: 'Missing Sanity configuration' });
   }
@@ -62,4 +65,3 @@ export async function GET() {
     return NextResponse.json({ enabled: true, ok: false, error: String(error) });
   }
 }
-

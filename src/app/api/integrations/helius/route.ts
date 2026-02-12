@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { requireApiUser } from '@/lib/api-auth';
 
 // Server-only env var (preferred). Keep NEXT_PUBLIC_* as back-compat fallback.
 const heliusUrl = process.env.HELIUS_URL || process.env.NEXT_PUBLIC_HELIUS_URL;
@@ -18,7 +19,9 @@ async function rpc(method: string, params: unknown[] = []): Promise<unknown> {
   return res.json();
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const auth = requireApiUser(request);
+  if (auth) return auth;
   if (!heliusUrl) {
     return NextResponse.json({ enabled: false, error: 'Missing Helius URL' });
   }
@@ -40,4 +43,3 @@ export async function GET() {
     return NextResponse.json({ enabled: true, ok: false, error: String(error) });
   }
 }
-
