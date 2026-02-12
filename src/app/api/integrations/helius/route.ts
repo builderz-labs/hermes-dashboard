@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
-const heliusUrl = process.env.NEXT_PUBLIC_HELIUS_URL;
+// Server-only env var (preferred). Keep NEXT_PUBLIC_* as back-compat fallback.
+const heliusUrl = process.env.HELIUS_URL || process.env.NEXT_PUBLIC_HELIUS_URL;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -23,10 +24,7 @@ export async function GET() {
   }
 
   try {
-    const [health, slot] = await Promise.all([
-      rpc('getHealth'),
-      rpc('getSlot'),
-    ]);
+    const [health, slot] = await Promise.all([rpc('getHealth'), rpc('getSlot')]);
 
     const healthResult = isRecord(health) ? health.result : null;
     const slotResult = isRecord(slot) ? slot.result : null;
@@ -42,3 +40,4 @@ export async function GET() {
     return NextResponse.json({ enabled: true, ok: false, error: String(error) });
   }
 }
+

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 
-const OLLAMA_TAGS = 'http://127.0.0.1:11434/api/tags';
-const OLLAMA_PS = 'http://127.0.0.1:11434/api/ps';
+const OLLAMA_BASE_URL = (process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434').replace(/\/+$/, '');
+const OLLAMA_TAGS = `${OLLAMA_BASE_URL}/api/tags`;
+const OLLAMA_PS = `${OLLAMA_BASE_URL}/api/ps`;
 const REQUIRED = ['qwen2.5-coder:7b', 'qwen2.5-coder:14b', 'deepseek-r1:14b', 'phi4:latest'];
 
 async function fetchWithTimeout(url: string, ms: number) {

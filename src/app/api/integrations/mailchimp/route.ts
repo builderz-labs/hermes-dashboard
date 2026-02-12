@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
-const apiKey = process.env.NEXT_PUBLIC_MAILCHIMP_API_KEY;
+// Server-only env var (preferred). Keep NEXT_PUBLIC_* as back-compat fallback.
+const apiKey = process.env.MAILCHIMP_API_KEY || process.env.NEXT_PUBLIC_MAILCHIMP_API_KEY;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -63,3 +64,4 @@ export async function GET() {
     return NextResponse.json({ enabled: true, ok: false, error: String(error) });
   }
 }
+

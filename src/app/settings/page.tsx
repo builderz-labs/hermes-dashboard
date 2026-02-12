@@ -724,28 +724,18 @@ export default function SettingsPage() {
         </h2>
         <div className="space-y-2 text-xs">
           <div className="flex items-center justify-between py-2 border-b border-border/30">
-            <span className="text-muted-foreground">Gateway</span>
-            <code className="bg-muted px-2 py-0.5 rounded">localhost:18802</code>
+            <span className="text-muted-foreground">Instances</span>
+            <span className="font-mono">{instances.length}</span>
           </div>
           <div className="flex items-center justify-between py-2 border-b border-border/30">
-            <span className="text-muted-foreground">Primary Model</span>
-            <span>Claude Sonnet 4</span>
-          </div>
-          <div className="flex items-center justify-between py-2 border-b border-border/30">
-            <span className="text-muted-foreground">Fallback Models</span>
-            <span>Haiku 4.5, Qwen 2.5 14B</span>
-          </div>
-          <div className="flex items-center justify-between py-2 border-b border-border/30">
-            <span className="text-muted-foreground">Agents</span>
-            <span>Hermes (marketing) + Apollo (sales)</span>
-          </div>
-          <div className="flex items-center justify-between py-2 border-b border-border/30">
-            <span className="text-muted-foreground">Cron Jobs</span>
-            <span>10 scheduled (weekdays)</span>
+            <span className="text-muted-foreground">Agent Discovery</span>
+            <span>Dynamic (from each instance OpenClaw config)</span>
           </div>
           <div className="flex items-center justify-between py-2">
-            <span className="text-muted-foreground">Skills</span>
-            <span>8 active</span>
+            <span className="text-muted-foreground">Notes</span>
+            <span className="text-muted-foreground">
+              Models, gateway, and cron wiring are defined by your OpenClaw deployment.
+            </span>
           </div>
         </div>
       </div>

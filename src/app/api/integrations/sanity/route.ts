@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 
-const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
-const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET;
-const apiVersion = process.env.NEXT_PUBLIC_SANITY_API_VERSION || '2022-11-15';
+// Server-only env vars (preferred). Keep NEXT_PUBLIC_* as back-compat fallback.
+const projectId = process.env.SANITY_PROJECT_ID || process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
+const dataset = process.env.SANITY_DATASET || process.env.NEXT_PUBLIC_SANITY_DATASET;
+const apiVersion = process.env.SANITY_API_VERSION || process.env.NEXT_PUBLIC_SANITY_API_VERSION || '2022-11-15';
 const token = process.env.SANITY_API_TOKEN;
 
 const TYPES = ['post', 'article', 'blogPost', 'blog', 'content', 'page'];
@@ -34,6 +35,7 @@ export async function GET() {
     if (!res.ok) {
       return NextResponse.json({ enabled: true, ok: false, error: `Sanity HTTP ${res.status}` });
     }
+
     const json: unknown = await res.json();
     const rawItems: unknown[] =
       isRecord(json) && Array.isArray(json.result) ? (json.result as unknown[]) : [];
@@ -54,8 +56,10 @@ export async function GET() {
         };
       })
       .filter((x): x is NonNullable<typeof x> => !!x);
+
     return NextResponse.json({ enabled: true, ok: true, count: items.length, items });
   } catch (error) {
     return NextResponse.json({ enabled: true, ok: false, error: String(error) });
   }
 }
+

@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { ImapFlow } from 'imapflow';
 
-const user = process.env.NEXT_PUBLIC_EMAIL_USER;
-const pass = process.env.NEXT_PUBLIC_EMAIL_PASSWORD;
+// Server-only env vars (preferred). Keep NEXT_PUBLIC_* as back-compat fallback,
+// but avoid using NEXT_PUBLIC_* for secrets in new deployments.
+const user = process.env.EMAIL_USER || process.env.NEXT_PUBLIC_EMAIL_USER;
+const pass = process.env.EMAIL_PASSWORD || process.env.NEXT_PUBLIC_EMAIL_PASSWORD;
 
 export async function GET() {
   if (!user || !pass) {
@@ -41,3 +43,4 @@ export async function GET() {
     }
   }
 }
+
