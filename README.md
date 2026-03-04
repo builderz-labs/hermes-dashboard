@@ -12,7 +12,7 @@ Last reviewed: 2026-03-04
 
 ![Hermes Dashboard Overview](./public/hermes-dashboard-overview.png)
 
-### Mission Control View
+### CRM
 
 ![Hermes Dashboard Mission Control](./public/hermes-dashboard-mission-control.png)
 
