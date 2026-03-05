@@ -8,7 +8,7 @@ import {
 import { toast } from '@/components/ui/toast';
 import { timeAgo } from '@/lib/utils';
 import { getRoleMatrix } from '@/lib/rbac';
-import pkg from '../../../../package.json';
+import pkg from '../../../package.json';
 
 interface SyncInfo {
   db_path: string;
