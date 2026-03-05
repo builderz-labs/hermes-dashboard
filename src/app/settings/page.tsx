@@ -8,6 +8,7 @@ import {
 import { toast } from '@/components/ui/toast';
 import { timeAgo } from '@/lib/utils';
 import { getRoleMatrix } from '@/lib/rbac';
+import pkg from '../../../../package.json';
 
 interface SyncInfo {
   db_path: string;
@@ -107,6 +108,7 @@ interface MemoryEffectPayload {
 }
 
 export default function SettingsPage() {
+  const dashboardVersion = pkg.version || 'dev';
   const roleMatrix = getRoleMatrix();
   const [instances, setInstances] = useState<HermesInstance[]>([]);
   const [syncInfo, setSyncInfo] = useState<SyncInfo | null>(null);
@@ -1100,23 +1102,27 @@ export default function SettingsPage() {
         <h2 className="text-sm font-medium flex items-center gap-2">
           <Info size={14} className="text-info" /> About
         </h2>
-        <div className="space-y-2 text-xs">
-          <div className="flex items-center justify-between py-1">
-            <span className="text-muted-foreground">Dashboard</span>
-            <span>Hermes Dashboard v1.0</span>
-          </div>
-          <div className="flex items-center justify-between py-1">
-            <span className="text-muted-foreground">Runtime</span>
+          <div className="space-y-2 text-xs">
+            <div className="flex items-center justify-between py-1">
+              <span className="text-muted-foreground">Dashboard</span>
+            <span>Hermes Dashboard v{dashboardVersion}</span>
+            </div>
+            <div className="flex items-center justify-between py-1">
+              <span className="text-muted-foreground">Runtime</span>
             <span>Next.js 16 + SQLite (WAL)</span>
-          </div>
-          <div className="flex items-center justify-between py-1">
-            <span className="text-muted-foreground">Agent Platform</span>
-            <span>OpenClaw 2026.2.6-3</span>
-          </div>
-          <div className="flex items-center justify-between py-1">
-            <span className="text-muted-foreground">Source</span>
+            </div>
+            <div className="flex items-center justify-between py-1">
+              <span className="text-muted-foreground">Agent Platform</span>
+            <span>OpenClaw (v2026.3.x compatible)</span>
+            </div>
+            <div className="flex items-center justify-between py-1">
+              <span className="text-muted-foreground">License</span>
+            <span>MIT</span>
+            </div>
+            <div className="flex items-center justify-between py-1">
+              <span className="text-muted-foreground">Source</span>
             <a
-              href="https://github.com/0xNyk/hermes-dashboard"
+              href="https://github.com/builderz-labs/hermes-dashboard"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline flex items-center gap-1"
