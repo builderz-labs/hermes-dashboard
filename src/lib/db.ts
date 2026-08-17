@@ -228,8 +228,21 @@ function migrate(db: Database.Database) {
       last_synced_at INTEGER
     );
 
+    CREATE TABLE IF NOT EXISTS llm_usage_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      day TEXT NOT NULL,
+      agent_id TEXT,
+      model TEXT,
+      total_tokens INTEGER DEFAULT 0,
+      cost_usd REAL DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_llm_usage_day ON llm_usage_events(day);
+    CREATE INDEX IF NOT EXISTS idx_llm_usage_agent ON llm_usage_events(agent_id, day);
+
   `);
 
   // Column migrations (safe to re-run)
   try { db.exec("ALTER TABLE leads ADD COLUMN pause_outreach INTEGER DEFAULT 0"); } catch { /* column exists */ }
+  try { db.exec("ALTER TABLE content_posts ADD COLUMN image_url TEXT"); } catch { /* column exists */ }
 }
